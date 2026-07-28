@@ -190,7 +190,7 @@ lr.fit(X_train, y_train)
 lr_preds_log = lr.predict(X_test)
 
 # --- Stronger model: Random Forest ---
-rf = RandomForestRegressor(n_estimators=200, max_depth=15, random_state=42, n_jobs=-1)
+rf = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42, n_jobs=-1)
 rf.fit(X_train, y_train)
 rf_preds_log = rf.predict(X_test)
 
@@ -213,6 +213,11 @@ def evaluate(y_true_log, y_pred_log, name):
 
 evaluate(y_test, lr_preds_log, "Linear Regression")
 evaluate(y_test, rf_preds_log, "Random Forest")
+
+import joblib
+joblib.dump(rf, 'models/rf_price_model.pkl')
+import os
+print(f"{os.path.getsize('models/rf_price_model.pkl') / 1e6:.1f} MB")
 
 #Feature Importance
 importances = pd.Series(rf.feature_importances_, index=X_train.columns)
