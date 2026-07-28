@@ -214,10 +214,12 @@ def evaluate(y_true_log, y_pred_log, name):
 evaluate(y_test, lr_preds_log, "Linear Regression")
 evaluate(y_test, rf_preds_log, "Random Forest")
 
-import joblib
-joblib.dump(rf, 'models/rf_price_model.pkl')
 import os
-print(f"{os.path.getsize('models/rf_price_model.pkl') / 1e6:.1f} MB")
+os.makedirs('models', exist_ok=True)
+
+joblib.dump(rf, 'models/rf_price_model.pkl')
+joblib.dump(feature_cols, 'models/feature_cols.pkl')
+joblib.dump(community_target_map, 'models/community_target_map.pkl')
 
 #Feature Importance
 importances = pd.Series(rf.feature_importances_, index=X_train.columns)
