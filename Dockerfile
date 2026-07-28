@@ -5,8 +5,11 @@ WORKDIR /app
 COPY api/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY Data/ ./Data/
+COPY Train.py .
+RUN python Train.py
+
 COPY api/ ./api/
-COPY models/ ./models/
 
 WORKDIR /app/api
 
