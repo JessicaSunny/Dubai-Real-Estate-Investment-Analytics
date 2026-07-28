@@ -6,7 +6,9 @@ Built as a hands-on demonstration of applying data science to real estate invest
 
 ---
 
-**Live API:** https://dubai-real-estate-investment-analytics.onrender.com/docs
+**Live API:**
+Render (FastAPI): https://dubai-real-estate-investment-analytics.onrender.com/docs
+Streamlit: https://dubai-real-estate-investment-analytics-jyvtswntqky3ephmaagnrh.streamlit.app/
 
 ## Table of Contents
 - [Data Source](#data-source)
