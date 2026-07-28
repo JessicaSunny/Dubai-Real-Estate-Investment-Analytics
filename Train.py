@@ -7,7 +7,7 @@ Created on Tue Jul 28 14:08:32 2026
 #--------------------------------------------------------------------------------------------------#
 import pandas as pd
 
-sales = pd.read_csv('secondary_sales.csv')
+sales = pd.read_csv('Data/secondary_sales.csv')
 
 print(sales.shape)
 print(sales.dtypes)
@@ -130,7 +130,7 @@ print(f"Test rows needing fallback (unseen community): {missing_before_fill}")
 print(train[['community', 'community_encoded']].drop_duplicates().head(10))
 
 #encode the remaining categoricals
-categorical_cols = ['property_type', 'view', 'condition', 'furnishing']
+categorical_cols = ['property_type', 'view', 'condition', 'furnishing','property_category']
 
 # One-hot encode both, then align columns (handles any category mismatch between train/test)
 train_encoded = pd.get_dummies(train, columns=categorical_cols, drop_first=True)
@@ -141,3 +141,94 @@ train_encoded, test_encoded = train_encoded.align(test_encoded, join='left', axi
 
 print(train_encoded.shape)
 print(test_encoded.shape)
+
+#--------------------------------------------------------------------------------------------------#
+# Columns to drop and why:
+drop_cols = [
+    'id',                    # identifier, no predictive value
+    'date_listed',           # already used for the split; raw date isn't a usable numeric feature as-is
+    'community',             # replaced by community_encoded
+    'zone',                  # coarser duplicate of community, skip for simplicity
+    'price_usd',             # this is derived FROM price — leakage if kept as a feature
+    'price_per_sqft_usd',    # same issue — this is calculated directly from the target
+    'price_per_m2_usd',      # same issue
+    'metro_station',         # metro_distance_min already captures the useful numeric signal
+    'metro_line',            # same reason
+    'metro_distance_type',   # categorical version of a numeric column we already have
+    'log_price',             # this IS our target — must not be in X
+    'calc_price_per_sqft',
+    'area_m2',
+]
+
+feature_cols = [c for c in train_encoded.columns if c not in drop_cols]
+print(feature_cols)
+print(len(feature_cols))
+
+#Build X and y
+X_train = train_encoded[feature_cols]
+y_train = train_encoded['log_price']
+
+X_test = test_encoded[feature_cols]
+y_test = test_encoded['log_price']
+
+print(X_train.shape, y_train.shape)
+print(X_test.shape, y_test.shape)
+
+# Quick check: any remaining non-numeric columns we missed?
+print(X_train.dtypes[X_train.dtypes == 'object'])
+
+#--------------------------------------------------------------------------------------------------#
+#Training your first baseline model
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import numpy as np
+
+# --- Baseline: simple linear regression ---
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+lr_preds_log = lr.predict(X_test)
+
+# --- Stronger model: Random Forest ---
+rf = RandomForestRegressor(n_estimators=200, max_depth=15, random_state=42, n_jobs=-1)
+rf.fit(X_train, y_train)
+rf_preds_log = rf.predict(X_test)
+
+def evaluate(y_true_log, y_pred_log, name):
+    # Convert back from log scale to actual USD for interpretable metrics
+    y_true = np.expm1(y_true_log)
+    y_pred = np.expm1(y_pred_log)
+    
+    mae = mean_absolute_error(y_true, y_pred)
+    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+    r2 = r2_score(y_true_log, y_pred_log)  # R² still computed on log scale
+    mape = np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+    
+    print(f"--- {name} ---")
+    print(f"MAE:  ${mae:,.0f}")
+    print(f"RMSE: ${rmse:,.0f}")
+    print(f"MAPE: {mape:.1f}%")
+    print(f"R²:   {r2:.3f}")
+    print()
+
+evaluate(y_test, lr_preds_log, "Linear Regression")
+evaluate(y_test, rf_preds_log, "Random Forest")
+
+#Feature Importance
+importances = pd.Series(rf.feature_importances_, index=X_train.columns)
+importances = importances.sort_values(ascending=False)
+print(importances.head(15))
+
+#SAVING THE MODEL
+import os
+print(os.getcwd())
+import os
+os.makedirs('models', exist_ok=True)
+
+import joblib
+joblib.dump(rf, 'models/rf_price_model.pkl')
+joblib.dump(feature_cols, 'models/feature_cols.pkl')
+joblib.dump(community_target_map, 'models/community_target_map.pkl')
+
+print("Saved: rf_price_model.pkl, feature_cols.pkl, community_target_map.pkl")
+print(os.listdir('models'))
