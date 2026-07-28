@@ -78,13 +78,15 @@ Given a property's characteristics (location, size, type, age, amenities), predi
 
 ## Results
 
-| Model | MAE (USD) | RMSE (USD) | MAPE | R² | Model Size |
-|---|---|---|---|---|---|
-| Linear Regression (baseline) | $242,244 | $581,289 | 17.0% | 0.956 | — |
-| Random Forest (n=200, depth=15) | $148,675 | $334,006 | 11.5% | 0.981 | 282 MB |
-| **Random Forest (n=100, depth=10) — deployed** | **$171,146** | — | **13.0%** | **0.976** | **14.4 MB** |
+Two model configurations were evaluated during development:
 
-The deployed model uses fewer, shallower trees than the initial version. The larger model (282 MB) exceeded the memory limit of the free-tier deployment environment; reducing tree count and depth cut the model size by ~95% for a modest accuracy tradeoff (11.5% → 13.0% MAPE) — a deliberate deployment-efficiency decision, not an oversight.
+| Model | MAE (USD) | RMSE (USD) | MAPE | R² |
+|---|---|---|---|---|
+| Linear Regression (baseline) | $242,244 | $581,289 | 17.0% | 0.956 |
+| Random Forest, n_estimators=200, max_depth=15 (initial) | $148,675 | $334,006 | 11.5% | 0.981 |
+| **Random Forest, n_estimators=100, max_depth=10 (deployed)** | **$171,146** | **$402,555** | **13.0%** | **0.976** |
+
+The initial Random Forest (200 trees, depth 15) produced a 282 MB model file, which exceeded the memory limit of the free-tier deployment environment. Reducing to 100 trees and depth 10 cut the model size to 14.4 MB (~95% smaller) for a modest accuracy tradeoff (11.5% → 13.0% MAPE). Only the deployed configuration is reflected in the current codebase — the initial version is documented here for context on the tradeoff made.
 
 Metrics are computed in real USD (converting predictions back from log-scale via `expm1`) rather than reported only on the log scale, since stakeholders reason in currency, not log-units.
 
