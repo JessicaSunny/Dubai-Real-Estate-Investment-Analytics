@@ -26,7 +26,7 @@ Built as a hands-on demonstration of applying data science to real estate invest
 
 Real Dubai property transaction data from [Dubai Real Estate: Sales & Rentals (2020–2026)](https://www.kaggle.com/datasets/sergionefedov/dubai-real-estate-sales-and-rentals-20202026) on Kaggle — 87,000+ listings across 84 communities with real coordinates.
 
-This project uses `secondary_sales.csv` (50,000 resale transactions, 2020–2026) as the core dataset. Companion files (`rentals.csv`, `area_prices_monthly.csv`, `metro_stations.csv`, `off_plan.csv`) are included in the source dataset for potential extension (see [Future Work](#future-work)).
+This project uses `secondary_sales.csv` (50,000 resale transactions, 2020–2026) as the core dataset. 
 
 **Raw CSVs are not committed to this repo** (excluded via `.gitignore` — large files, redistributable from the Kaggle link above). Download the dataset and place the CSVs in a `Data/` folder at the project root before running `Train.py`.
 
