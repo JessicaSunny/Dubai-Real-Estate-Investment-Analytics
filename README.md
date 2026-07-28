@@ -3,6 +3,7 @@
 An end-to-end investment analytics project built on real Dubai transaction data — covering property valuation (ML), rental yield analysis, market trend/risk profiling, and portfolio optimization. Includes a deployed prediction API and an interactive dashboard combining all three analyses.
 
 **🔗 Live API (FastAPI, price prediction):** https://dubai-real-estate-investment-analytics.onrender.com/docs
+
 **🔗 Live Dashboard (Streamlit, full analysis):** https://dubai-real-estate-investment-analytics-jyvtswntqky3ephmaagnrh.streamlit.app/
 
 *Note: the Render API free tier spins down after inactivity — the first request may take 30–60 seconds to respond.*
